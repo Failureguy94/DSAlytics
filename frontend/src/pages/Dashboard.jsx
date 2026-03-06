@@ -15,41 +15,35 @@ export default function Dashboard() {
   };
 
   return (
-    <>
-    <div>
-      Hello Dashboard! This is where your analytics will be displayed.
+    <div className="dashboard">
+      <header className="dashboard-header">
+        <div className="header-content">
+          <h1 className="logo">DSAlytics</h1>
+          <button className="btn btn-outline" onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
+      </header>
+
+      <main className="dashboard-main">
+        <div className="dashboard-grid">
+          <section className="grid-full">
+            <Heatmap onDateSelect={setSelectedDate} />
+          </section>
+
+          <section className="grid-half">
+            <PlatformChart date={selectedDate} />
+          </section>
+
+          <section className="grid-half">
+            <SubmissionList date={selectedDate} />
+          </section>
+
+          <section className="grid-full">
+            <HandleManager />
+          </section>
+        </div>
+      </main>
     </div>
-    {/* ---------------------------------------------------------------------------------------> */}
-     <div className="dashboard">
-       <header className="dashboard-header">
-         <div className="header-content">
-           <h1 className="logo">DSAlytics</h1>
-           <button className="btn btn-outline" onClick={handleLogout}>
-             Logout
-           </button>
-         </div>
-       </header> 
-
-       <main className="dashboard-main">
-         <div className="dashboard-grid">
-           <section className="grid-full">
-             <Heatmap onDateSelect={setSelectedDate} />
-           </section>
-
-           <section className="grid-half">
-             <PlatformChart date={selectedDate} />
-           </section>
-
-           <section className="grid-half">
-             <SubmissionList date={selectedDate} />
-           </section>
-
-           <section className="grid-full">
-             <HandleManager />
-           </section>
-         </div>
-       </main>
-     </div>
-    </>
   );
 }

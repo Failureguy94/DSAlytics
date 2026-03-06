@@ -12,7 +12,10 @@ export default function SubmissionList({ date }) {
     setError('');
     api
       .get(`/history/${date}`)
-      .then((res) => setSubmissions(res.data))
+      .then((res) => {
+        const rows = res.data.data;
+        setSubmissions(Array.isArray(rows) ? rows : []);
+      })
       .catch(() => setError('Failed to load submission history.'))
       .finally(() => setLoading(false));
   }, [date]);
@@ -41,20 +44,20 @@ export default function SubmissionList({ date }) {
             </thead>
             <tbody>
               {submissions.map((sub, i) => (
-                <tr key={i}>
+                <tr key={sub.submission_id || i}>
                   <td>
-                    {sub.link ? (
-                      <a href={sub.link} target="_blank" rel="noopener noreferrer" className="problem-link">
-                        {sub.title || sub.problem_title || 'Untitled'}
+                    {sub.url ? (
+                      <a href={sub.url} target="_blank" rel="noopener noreferrer" className="problem-link">
+                        {sub.title || 'Untitled'}
                       </a>
                     ) : (
-                      sub.title || sub.problem_title || 'Untitled'
+                      sub.title || 'Untitled'
                     )}
                   </td>
                   <td>
-                    <span className="platform-badge">{sub.platform}</span>
+                    <span className="platform-badge">{sub.platform_name}</span>
                   </td>
-                  <td className="submission-time">{formatTime(sub.submitted_at || sub.timestamp)}</td>
+                  <td className="submission-time">{formatTime(sub.submitted_at)}</td>
                 </tr>
               ))}
             </tbody>

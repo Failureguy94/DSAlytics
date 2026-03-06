@@ -12,14 +12,16 @@ function normalizeValues(raw) {
     return [];
   }
 
-  const normalized = raw.reduce((acc, entry) => {
+  return raw.reduce((acc, entry) => {
     if (!entry || typeof entry !== 'object') {
       console.warn('[Heatmap] Skipping non-object entry:', entry);
       return acc;
     }
 
-    const date = typeof entry.date === 'string' ? entry.date.trim() : null;
-    const count = Number(entry.count);
+    const date = typeof entry.activity_date === 'string'
+      ? entry.activity_date.trim().slice(0, 10)
+      : null;
+    const count = Number(entry.total_count);
 
     if (!date || !DATE_REGEX.test(date)) {
       console.warn('[Heatmap] Skipping entry with invalid date:', entry);
@@ -34,21 +36,23 @@ function normalizeValues(raw) {
     acc.push({ date, count });
     return acc;
   }, []);
-
-  return normalized;
 }
 
 export default function Heatmap({ onDateSelect }) {
   const [values, setValues] = useState(null);
   const [error, setError] = useState('');
 
+  const today = new Date();
+  const startDate = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
+
   useEffect(() => {
     api
       .get('/heatmap')
       .then((res) => {
-        console.log('[Heatmap] Raw response from /heatmap:', res.data);
-        const normalized = normalizeValues(res.data);
-        console.log('[Heatmap] Normalized values passed to CalendarHeatmap:', normalized);
+        const payload = res.data.data;
+        console.log('[Heatmap] Raw payload from /heatmap:', payload);
+        const normalized = normalizeValues(payload);
+        console.log('[Heatmap] Normalized values:', normalized);
         setValues(normalized);
       })
       .catch((err) => {
@@ -57,12 +61,6 @@ export default function Heatmap({ onDateSelect }) {
         setValues([]);
       });
   }, []);
-
-  const today = new Date();
-  const startDate = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
-
-  console.log('[Heatmap] startDate:', startDate.toISOString(), '| endDate:', today.toISOString());
-  console.log('[Heatmap] startDate valid:', !isNaN(startDate.getTime()), '| endDate valid:', !isNaN(today.getTime()));
 
   return (
     <div className="card">

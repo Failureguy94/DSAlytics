@@ -3,7 +3,7 @@ import api from '../api/api';
 
 export default function HandleManager() {
   const [handles, setHandles] = useState([]);
-  const [form, setForm] = useState({ platform: '', handle: '' });
+  const [form, setForm] = useState({ platform_id: '', handle: '' });
   const [error, setError] = useState('');
   const [syncStatus, setSyncStatus] = useState({});
   const [loading, setLoading] = useState(false);
@@ -11,7 +11,10 @@ export default function HandleManager() {
   const fetchHandles = () => {
     api
       .get('/handles')
-      .then((res) => setHandles(res.data))
+      .then((res) => {
+        const rows = res.data.data;
+        setHandles(Array.isArray(rows) ? rows : []);
+      })
       .catch(() => setError('Failed to load handles.'));
   };
 
@@ -28,8 +31,11 @@ export default function HandleManager() {
     setError('');
     setLoading(true);
     try {
-      await api.post('/handles', form);
-      setForm({ platform: '', handle: '' });
+      await api.post('/handles', {
+        platform_id: Number(form.platform_id),
+        handle: form.handle,
+      });
+      setForm({ platform_id: '', handle: '' });
       fetchHandles();
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to add handle.');
@@ -74,10 +80,12 @@ export default function HandleManager() {
 
       <form onSubmit={handleAdd} className="handle-form">
         <input
-          name="platform"
-          value={form.platform}
+          name="platform_id"
+          type="number"
+          min="1"
+          value={form.platform_id}
           onChange={handleChange}
-          placeholder="Platform (e.g. codeforces)"
+          placeholder="Platform ID (e.g. 1)"
           required
         />
         <input
@@ -99,7 +107,7 @@ export default function HandleManager() {
           {handles.map((h) => (
             <li key={h.id} className="handle-item">
               <div className="handle-info">
-                <span className="platform-badge">{h.platform}</span>
+                <span className="platform-badge">{h.platform_name}</span>
                 <span className="handle-name">{h.handle}</span>
               </div>
               <div className="handle-actions">

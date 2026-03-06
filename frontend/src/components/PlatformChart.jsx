@@ -15,7 +15,13 @@ export default function PlatformChart({ date }) {
     setError('');
     api
       .get(`/heatmap/${date}/platforms`)
-      .then((res) => setData(res.data))
+      .then((res) => {
+        const rows = res.data.data;
+        const mapped = Array.isArray(rows)
+          ? rows.map((r) => ({ platform: r.platform_name, count: r.count }))
+          : [];
+        setData(mapped);
+      })
       .catch(() => setError('Failed to load platform data.'))
       .finally(() => setLoading(false));
   }, [date]);
